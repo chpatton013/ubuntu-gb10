@@ -31,6 +31,14 @@
     - role: docker_gpu
       tags: docker_gpu
 
+    # doca_ofed: optional ConnectX-7 / DOCA-OFED driver stack. Skips itself on
+    # hosts without a ConnectX-7 NIC. Required before dual_node for full RDMA/
+    # GPUDirect support (dual_node's netplan step works without it, but only
+    # gets the in-kernel stock mlx5_core driver).
+    # ansible-playbook site.yml --tags doca_ofed
+    - role: doca_ofed
+      tags: doca_ofed
+
     # dual_node: run against both nodes simultaneously to set up CX-7 networking,
     # SSH key exchange, and NCCL build. Requires 2+ hosts in the target group.
     # ansible-playbook site.yml --tags dual_node

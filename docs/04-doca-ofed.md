@@ -14,6 +14,12 @@ and management tools for ConnectX NICs (successor to MLNX_OFED).
 
 Reference: <https://docs.nvidia.com/dgx/dgx-os-7-user-guide/installing_on_ubuntu.html#installing-the-doca-ofed-package>
 
+> **Ansible shortcut:** the steps below are automated by the `doca_ofed` role.
+> Run `ansible-playbook site.yml --tags doca_ofed` instead of following Steps 1-3
+> by hand. The role detects the ConnectX-7 NIC, skips itself if absent, and
+> reboots automatically to load the new kernel modules and apply any pending
+> NIC firmware update. See [../README.md](../README.md#ansible-automation).
+
 ---
 
 ## Prerequisites

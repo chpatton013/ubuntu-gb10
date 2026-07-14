@@ -1,0 +1,72 @@
+---
+# -------------------------------------------------------------------------
+# ConnectX-7 detection - skip entirely on hardware without the NIC
+# -------------------------------------------------------------------------
+- name: Check for ConnectX-7 NIC
+  ansible.builtin.shell:
+    cmd: set -o pipefail && lspci | grep -i "ConnectX-7"
+    executable: /bin/bash
+  register: connectx7_check
+  changed_when: false
+  failed_when: false
+
+- name: Skip DOCA-OFED role (no ConnectX-7 NIC detected)
+  ansible.builtin.meta: end_host
+  when: connectx7_check.rc != 0
+
+# -------------------------------------------------------------------------
+# DOCA repo + NVIDIA repo keys
+# -------------------------------------------------------------------------
+- name: Check if DOCA-OFED (nvidia-system-mlnx-drivers) is already installed
+  ansible.builtin.command: dpkg-query -W -f='${Status}' nvidia-system-mlnx-drivers
+  register: doca_ofed_check
+  changed_when: false
+  failed_when: false
+
+- name: Install DOCA repo package and NVIDIA repo keys
+  ansible.builtin.apt:
+    name:
+      - doca-bos8-latest-repo
+      - nvidia-repo-keys
+    state: present
+  when: "'install ok installed' not in doca_ofed_check.stdout"
+
+- name: Update apt cache with DOCA repository
+  ansible.builtin.apt:
+    update_cache: yes
+  when: "'install ok installed' not in doca_ofed_check.stdout"
+
+- name: Full upgrade to resolve DOCA-OFED dependencies
+  ansible.builtin.apt:
+    upgrade: full
+  when: "'install ok installed' not in doca_ofed_check.stdout"
+
+# -------------------------------------------------------------------------
+# ConnectX-7 / DOCA-OFED drivers
+# -------------------------------------------------------------------------
+- name: Install ConnectX-7 / DOCA-OFED drivers
+  ansible.builtin.apt:
+    name: nvidia-system-mlnx-drivers
+    state: present
+  register: mlnx_drivers_install
+
+- name: Reboot to load DOCA-OFED kernel modules and apply pending NIC firmware
+  ansible.builtin.reboot:
+    reboot_timeout: 300
+    post_reboot_delay: 30
+    msg: "Rebooting to load DOCA-OFED kernel modules"
+  when: mlnx_drivers_install.changed
+
+# -------------------------------------------------------------------------
+# Verification
+# -------------------------------------------------------------------------
+- name: Check loaded kernel modules
+  ansible.builtin.command: lsmod
+  register: lsmod_out
+  changed_when: false
+
+- name: Assert mlx5_core module is loaded
+  ansible.builtin.assert:
+    that: "'mlx5_core' in lsmod_out.stdout"
+    fail_msg: "mlx5_core module not loaded after DOCA-OFED install"
+    success_msg: "mlx5_core: loaded"

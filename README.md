@@ -90,8 +90,10 @@ may trail the DGX Spark Founders Edition by a release or two.
 
 ## Ansible Automation
 
-The `playbooks/` directory contains Ansible roles that automate steps 2-5 above.
-The Ubuntu install (step 1) and the Secure Boot MOK console enrollment must be done manually.
+The `playbooks/` directory contains Ansible roles that automate steps 2-5 above
+(step 4, DOCA-OFED, is handled by the `doca_ofed` role and skips itself on
+hardware without a ConnectX-7 NIC). The Ubuntu install (step 1) and the Secure
+Boot MOK console enrollment must be done manually.
 
 ### Prerequisites
 
