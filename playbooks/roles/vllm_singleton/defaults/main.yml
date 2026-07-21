@@ -1,0 +1,10 @@
+---
+vllm_image: ghcr.io/timothystewart6/vllm-gb10:v0.23.1rc0-gb10.0
+vllm_model: Qwen/Qwen3.5-35B-A3B-FP8
+vllm_compose_dir: /home/automation/vllm
+vllm_model_cache: /mnt/llm/models/huggingface
+vllm_compile_cache: /mnt/llm/vllm-compile-cache
+vllm_hf_token: ""
+vllm_gpu_memory_utilization: "0.8"
+vllm_max_model_len: auto
+vllm_shm_size: 10.24gb

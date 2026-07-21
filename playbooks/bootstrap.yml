@@ -1,10 +1,10 @@
 ---
-# bootstrap.yml - Run ONCE as the install user (e.g. serveradmin) before site.yml.
+# bootstrap.yml - Run ONCE as the install user (e.g. infra) before site.yml.
 # Creates the automation account and deploys its SSH key so site.yml can connect.
 #
 # Usage:
 #   ansible-playbook bootstrap.yml -i <ip-or-hostname>, \
-#     -u serveradmin --ask-pass --ask-become-pass
+#     -u infra --ask-pass --ask-become-pass
 #
 # The comma after the host is required when passing a bare host (no inventory file).
 

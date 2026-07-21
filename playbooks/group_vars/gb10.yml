@@ -28,4 +28,4 @@ vllm_hf_token: ""
 # Users to add to the docker group
 docker_users:
   - automation
-  - serveradmin
+  - infra

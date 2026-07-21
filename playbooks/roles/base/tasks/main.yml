@@ -4,6 +4,7 @@
     update_cache: yes
     upgrade: dist
     cache_valid_time: 0
+    allow_downgrade: yes
 
 - name: Purge unattended-upgrades
   ansible.builtin.apt:

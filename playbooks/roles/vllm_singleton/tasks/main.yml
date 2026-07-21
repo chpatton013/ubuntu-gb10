@@ -31,14 +31,6 @@
     group: automation
     mode: '0644'
 
-- name: Deploy patch_minimax_ipc.py
-  ansible.builtin.copy:
-    src: patch_minimax_ipc.py
-    dest: "{{ vllm_compose_dir }}/patch_minimax_ipc.py"
-    owner: automation
-    group: automation
-    mode: '0644'
-
 - name: Pull vLLM image
   ansible.builtin.command:
     cmd: docker pull {{ vllm_image }}

@@ -1,0 +1,41 @@
+services:
+  vllm-singelton:
+    image: {{ vllm_image }}
+    container_name: vllm-singelton
+    restart: unless-stopped
+    network_mode: host
+    ipc: host
+    shm_size: '{{ vllm_shm_size }}'
+    # privileged: true is required to reach ~40 tok/sec on GB10. Without it
+    # generation drops to ~24 tok/sec.
+    privileged: true
+    cap_add:
+      - SYS_PTRACE
+    ulimits:
+      memlock: -1
+    volumes:
+      - {{ vllm_model_cache }}:/root/.cache/huggingface
+      - {{ vllm_compile_cache }}:/root/.cache/vllm
+    env_file:
+      - .env
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
+      - SAFETENSORS_FAST_GPU=1
+      - OMP_NUM_THREADS=4
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - "vllm serve {{ vllm_model }} --host 0.0.0.0 --port 8000 --trust-remote-code --gpu-memory-utilization {{ vllm_gpu_memory_utilization }} --load-format fastsafetensors --max-model-len {{ vllm_max_model_len }} --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser qwen3"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 60
+      start_period: 1800s
